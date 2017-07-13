@@ -5,7 +5,7 @@ import urllib
 import requests
 from bs4 import BeautifulSoup
 
-import arraybuffer
+from pnapi import arraybuffer
 
 
 class PnAPI:

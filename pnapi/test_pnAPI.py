@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pnapi import PnAPI
+from pnapi.api import PnAPI
 
 
 class TestPnAPI(TestCase):
