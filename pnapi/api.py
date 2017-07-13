@@ -96,3 +96,27 @@ class PnAPI:
         params = urllib.parse.urlencode(data)
         r = self.session.get("{0.endpoint}/api?datatype=2d_query&dataset={0.dataset}&{1}".format(self, params), data=json.dumps(data))
         return arraybuffer.decode(io.BytesIO(r.content))
+
+    def getQuery(self, table, columns, query=None):
+        if query is None:
+            query = '{"whcClass":"trivial","isCompound":false,"isTrivial":true,"Tpe":""}'
+        data = {
+            'database': self.dataset,
+            'table': table,
+            'columns': json.dumps(columns),
+            'query': query,
+        }
+        r = self.session.post("{0.endpoint}/api?datatype=query".format(self), data=json.dumps(data))
+        return arraybuffer.decode(io.BytesIO(r.content))
+
+    def getGene(self, id):
+        arrays = self.getQuery('annotation', ['fid', 'chromid', 'fname', 'fnames', 'descr', 'fstart', 'fstop', 'fparentid', 'ftype'],
+                            '{"whcClass": "comparefixed", "isCompound": false, "ColName": "fid", "CompValue": "'+id+'", "Tpe": "="}')
+        if len(arrays['fid']) != 1:
+            raise LookupError('No gene found')
+        else:
+            return {'chrom': str(arrays['chromid'][0]), 'start': arrays['fstart'][0], 'stop': arrays['fstop'][0]}
+
+    def getPropsForGene(self, geneId, table, props):
+        gene = self.getGene(geneId)
+        return self.getQuery(table, props, '{"whcClass":"compound","isCompound":true,"isRoot":true,"Components":[{"whcClass":"comparefixed","isCompound":false,"ColName":"POS","CompValue":'+str(gene['start']) + ',"Tpe":">="},{"whcClass":"comparefixed","isCompound":false,"ColName":"POS","CompValue":'+str(gene['stop']) + ',"Tpe":"<="},{"whcClass":"comparefixed","isCompound":false,"ColName":"CHROM","CompValue":"'+gene['chrom']+'","Tpe":"="}],"Tpe":"AND"}')
