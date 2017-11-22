@@ -72,7 +72,7 @@ class PnAPI:
             output = output + _keyStr[enc1] + _keyStr[enc2] + _keyStr[enc3] + _keyStr[enc4]
         return output
 
-    def get2D(self, table, props, col_props, row_props, col_qry, row_qry, col_order, row_order):
+    def get2D(self, table, props, col_props, row_props, col_qry, row_qry, col_order, row_order, row_limit, row_offset):
         props = '~'.join(props)
         col_props = '~'.join(col_props)
         row_props = '~'.join(row_props)
@@ -91,7 +91,9 @@ class PnAPI:
             'colQry': col_qry,
             'rowQry': row_qry,
             'rowOrder': row_order,
-            'colOrder': col_order
+            'colOrder': col_order,
+            'rowLimit': row_limit,
+            'rowOffset': row_offset
         }
         params = urllib.parse.urlencode(data)
         r = self.session.get("{0.endpoint}/api?datatype=2d_query&dataset={0.dataset}&{1}".format(self, params), data=json.dumps(data))
